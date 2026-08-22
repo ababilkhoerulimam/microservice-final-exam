@@ -1,10 +1,18 @@
-# Microservice Academic System (UAS Arsitektur Komputer & Sistem Operasi)
+# Microservice Academic System
 
-Proyek ini merupakan implementasi arsitektur **Microservices** menggunakan **Docker & Docker Compose** untuk sistem akademik sederhana (Otentikasi Akun & Perhitungan IPS Mahasiswa).
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Docker Compose](https://img.shields.io/badge/Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+
+Implementasi arsitektur microservices menggunakan Docker dan Docker Compose untuk sistem informasi akademik sederhana, mencakup autentikasi akun dan kalkulasi IPS (Indeks Prestasi Semester) mahasiswa.
 
 ---
 
-## 🏛️ Arsitektur Sistem
+## Arsitektur Sistem
 
 ```
                       +-----------------------------+
@@ -34,49 +42,49 @@ Proyek ini merupakan implementasi arsitektur **Microservices** menggunakan **Doc
        +----------------------------+
 ```
 
-Seluruh *container* terhubung dalam satu jaringan internal bridge (`academic-net`) dengan isolasi subnet khusus `172.16.0.0/28`.
+Seluruh container terhubung dalam satu jaringan internal bridge (`academic-net`) dengan isolasi subnet `172.16.0.0/28`.
 
 ---
 
-## ✅ Ketercapaian Spesifikasi Soal UAS
+## Pemenuhan Spesifikasi Soal UAS
 
-### 1. Task Wajib (Mandatory Tasks - 30%)
-* [x] **Internal Networking:** Menggunakan driver `bridge` dengan nama kustom `academic-net`.
-* [x] **Volumes:** Persistensi data didefinisikan untuk folder `./auth-data` ke `/data/db`.
-* [x] **Sub-layanan API Gateway:**
-  * Image: `nginx:alpine`
-  * Nama container: `api-gateway`
-  * Mapping volume: `./nginx.conf` $\rightarrow$ `/etc/nginx/nginx.conf` dengan mode **read-only** (`:ro`).
-  * Dependensi: `depends_on: [auth-service, score-service]`
-  * Terhubung ke `academic-net`.
-* [x] **Sub-layanan Auth:**
-  * Nama container: `auth-service`
-  * Dependensi: `depends_on: [auth-db]`
-  * Terhubung ke `academic-net`.
-  * Environment variables: `NODE_ENV=development`, `PORT=3001`, `MONGO_URI=mongodb://auth-db:27017/auth`, dan `JWT_SECRET`.
-* [x] **Sub-layanan DB Auth:**
-  * Image: `mongo:6.0`
-  * Nama container: `auth-db`
-  * Terhubung ke `academic-net`.
-  * Mapping folder `./auth-data` ke `/data/db`.
-* [x] **Pemrograman API Perhitungan IPS:**
-  * Sub-layanan `score-service` mengimplementasikan kalkulasi Indeks Prestasi Semester secara dinamis berdasarkan SKS dan bobot nilai mata kuliah.
+### 1. Task Wajib
+- **Internal Networking:** Menggunakan driver `bridge` dengan nama kustom `academic-net`.
+- **Volumes:** Persistensi data didefinisikan untuk folder `./auth-data` ke `/data/db`.
+- **Sub-layanan API Gateway:**
+  - Image: `nginx:alpine`
+  - Nama container: `api-gateway`
+  - Mapping volume: `./nginx.conf` -> `/etc/nginx/nginx.conf` dengan mode read-only (`:ro`).
+  - Dependensi: `depends_on: [auth-service, score-service]`
+  - Terhubung ke `academic-net`.
+- **Sub-layanan Auth:**
+  - Nama container: `auth-service`
+  - Dependensi: `depends_on: [auth-db]`
+  - Terhubung ke `academic-net`.
+  - Environment variables: `NODE_ENV=development`, `PORT=3001`, `MONGO_URI=mongodb://auth-db:27017/auth`, `JWT_SECRET`.
+- **Sub-layanan DB Auth:**
+  - Image: `mongo:6.0`
+  - Nama container: `auth-db`
+  - Terhubung ke `academic-net`.
+  - Mapping folder `./auth-data` ke `/data/db`.
+- **Sub-layanan Penilaian:**
+  - Pemrograman API pada `score-service` untuk menghitung IPS mahasiswa berdasarkan SKS dan nilai huruf.
 
-### 2. Task Opsional (Bonus Tasks - 10%)
-* [x] **Internal Networking Subnet:** Mendefinisikan subnet `172.16.0.0/28` via IPAM configuration.
-* [x] **API Gateway Exposed Port:** Port host diarahkan ke `8081` (`"8081:80"`).
-* [x] **Resource Limits Auth Service:** CPU dibatasi `0.5` virtual core dan RAM dibatasi `512M` (512 MegaBytes).
-* [x] **Auto-restart DB Auth:** Dikonfigurasi dengan `restart: unless-stopped`.
+### 2. Task Opsional (Bonus)
+- **Internal Networking Subnet:** Subnet kustom `172.16.0.0/28` via konfigurasi IPAM.
+- **API Gateway Exposed Port:** Port host diarahkan ke `8081` (`"8081:80"`).
+- **Resource Limits Auth Service:** CPU dibatasi 0.5 virtual core dan RAM 512 MB.
+- **Auto-restart DB Auth:** Kebijakan `restart: unless-stopped`.
 
 ---
 
-## 🚀 Panduan Menjalankan Layanan
+## Panduan Menjalankan Layanan
 
-### Prasyarat:
-* Docker & Docker Compose sudah terpasang di sistem.
+### Prasyarat
+- Docker Engine dan Docker Compose sudah terpasang di sistem.
 
-### 1. Jalankan Seluruh Microservice
-Cukup jalankan satu perintah berikut di root folder project:
+### 1. Menjalankan Seluruh Service
+Jalankan perintah berikut di direktori root proyek:
 ```bash
 docker-compose up --build -d
 ```
@@ -85,7 +93,7 @@ docker-compose up --build -d
 ```bash
 docker-compose ps
 ```
-Semua container (`api-gateway`, `auth-service`, `auth-db`, `score-service`) harus berstatus `running` / `Up`.
+Semua container (`api-gateway`, `auth-service`, `auth-db`, `score-service`) harus berstatus running / Up.
 
 ### 3. Menghentikan Layanan
 ```bash
@@ -94,13 +102,14 @@ docker-compose down
 
 ---
 
-## 📚 Dokumentasi API Endpoint
+## Dokumentasi API Endpoint
 
-Semua request diarahkan melalui **API Gateway** di port `8081`.
+Seluruh request dikirim melalui API Gateway pada host port `8081`.
 
-### 1. Gateway Health Status
-* **URL:** `GET http://localhost:8081/`
-* **Response:**
+### 1. Gateway Status
+- **Method:** `GET`
+- **URL:** `http://localhost:8081/`
+- **Response:**
 ```json
 {
   "status": "online",
@@ -115,12 +124,13 @@ Semua request diarahkan melalui **API Gateway** di port `8081`.
 
 ---
 
-### 2. Sub-layanan Otentikasi (`auth-service`)
+### 2. Sub-layanan Autentikasi (`auth-service`)
 
-#### A. Registrasi Mahasiswa
-* **URL:** `POST http://localhost:8081/api/auth/register`
-* **Header:** `Content-Type: application/json`
-* **Request Body:**
+#### A. Registrasi Akun Mahasiswa
+- **Method:** `POST`
+- **URL:** `http://localhost:8081/api/auth/register`
+- **Headers:** `Content-Type: application/json`
+- **Body:**
 ```json
 {
   "nim": "23051204001",
@@ -129,7 +139,7 @@ Semua request diarahkan melalui **API Gateway** di port `8081`.
   "password": "passwordRahasia123"
 }
 ```
-* **Response (201 Created):**
+- **Response (201 Created):**
 ```json
 {
   "success": true,
@@ -146,16 +156,17 @@ Semua request diarahkan melalui **API Gateway** di port `8081`.
 ```
 
 #### B. Login Mahasiswa
-* **URL:** `POST http://localhost:8081/api/auth/login`
-* **Header:** `Content-Type: application/json`
-* **Request Body:**
+- **Method:** `POST`
+- **URL:** `http://localhost:8081/api/auth/login`
+- **Headers:** `Content-Type: application/json`
+- **Body:**
 ```json
 {
   "nim": "23051204001",
   "password": "passwordRahasia123"
 }
 ```
-* **Response (200 OK):**
+- **Response (200 OK):**
 ```json
 {
   "success": true,
@@ -171,10 +182,11 @@ Semua request diarahkan melalui **API Gateway** di port `8081`.
 }
 ```
 
-#### C. Profil User (Protected Endpoint)
-* **URL:** `GET http://localhost:8081/api/auth/me`
-* **Header:** `Authorization: Bearer <TOKEN_JWT_DARI_LOGIN>`
-* **Response (200 OK):**
+#### C. Profil Pengguna (Endpoint Terproteksi)
+- **Method:** `GET`
+- **URL:** `http://localhost:8081/api/auth/me`
+- **Headers:** `Authorization: Bearer <TOKEN_JWT_DARI_LOGIN>`
+- **Response (200 OK):**
 ```json
 {
   "success": true,
@@ -194,8 +206,9 @@ Semua request diarahkan melalui **API Gateway** di port `8081`.
 ### 3. Sub-layanan Penilaian (`score-service`)
 
 #### A. Informasi Skala Bobot Nilai
-* **URL:** `GET http://localhost:8081/api/score/grades-scale`
-* **Response (200 OK):**
+- **Method:** `GET`
+- **URL:** `http://localhost:8081/api/score/grades-scale`
+- **Response (200 OK):**
 ```json
 {
   "success": true,
@@ -214,9 +227,10 @@ Semua request diarahkan melalui **API Gateway** di port `8081`.
 ```
 
 #### B. Hitung IPS (Indeks Prestasi Semester) Mahasiswa
-* **URL:** `POST http://localhost:8081/api/score/calculate-ips`
-* **Header:** `Content-Type: application/json`
-* **Request Body:**
+- **Method:** `POST`
+- **URL:** `http://localhost:8081/api/score/calculate-ips`
+- **Headers:** `Content-Type: application/json`
+- **Body:**
 ```json
 {
   "nim": "23051204001",
@@ -232,7 +246,7 @@ Semua request diarahkan melalui **API Gateway** di port `8081`.
   ]
 }
 ```
-* **Response (200 OK):**
+- **Response (200 OK):**
 ```json
 {
   "success": true,
@@ -253,60 +267,12 @@ Semua request diarahkan melalui **API Gateway** di port `8081`.
       "max_sks_semester_berikutnya": 24
     },
     "courses": [
-      {
-        "code": "DS101",
-        "name": "Arsitektur Komputer & Sistem Operasi",
-        "sks": 3,
-        "grade": "A",
-        "point": 4,
-        "mutu": 12,
-        "is_passed": true
-      },
-      {
-        "code": "DS102",
-        "name": "Basis Data",
-        "sks": 3,
-        "grade": "B+",
-        "point": 3.5,
-        "mutu": 10.5,
-        "is_passed": true
-      },
-      {
-        "code": "DS103",
-        "name": "Pemrograman Web & Microservice",
-        "sks": 3,
-        "grade": "A",
-        "point": 4,
-        "mutu": 12,
-        "is_passed": true
-      },
-      {
-        "code": "DS104",
-        "name": "Statistika Komputasi",
-        "sks": 3,
-        "grade": "A-",
-        "point": 3.75,
-        "mutu": 11.25,
-        "is_passed": true
-      },
-      {
-        "code": "DS105",
-        "name": "Algoritma & Struktur Data",
-        "sks": 4,
-        "grade": "B",
-        "point": 3,
-        "mutu": 12,
-        "is_passed": true
-      },
-      {
-        "code": "DS106",
-        "name": "Kecerdasan Buatan",
-        "sks": 3,
-        "grade": "B+",
-        "point": 3.5,
-        "mutu": 10.5,
-        "is_passed": true
-      }
+      { "code": "DS101", "name": "Arsitektur Komputer & Sistem Operasi", "sks": 3, "grade": "A", "point": 4, "mutu": 12, "is_passed": true },
+      { "code": "DS102", "name": "Basis Data", "sks": 3, "grade": "B+", "point": 3.5, "mutu": 10.5, "is_passed": true },
+      { "code": "DS103", "name": "Pemrograman Web & Microservice", "sks": 3, "grade": "A", "point": 4, "mutu": 12, "is_passed": true },
+      { "code": "DS104", "name": "Statistika Komputasi", "sks": 3, "grade": "A-", "point": 3.75, "mutu": 11.25, "is_passed": true },
+      { "code": "DS105", "name": "Algoritma & Struktur Data", "sks": 4, "grade": "B", "point": 3, "mutu": 12, "is_passed": true },
+      { "code": "DS106", "name": "Kecerdasan Buatan", "sks": 3, "grade": "B+", "point": 3.5, "mutu": 10.5, "is_passed": true }
     ]
   }
 }
@@ -314,8 +280,6 @@ Semua request diarahkan melalui **API Gateway** di port `8081`.
 
 ---
 
-## 🛠️ Pengujian dengan Extension VS Code
-1. **Thunder Client / Postman:**
-   * Import endpoint URLs di atas dan kirim request ke `http://localhost:8081`.
-2. **Docker Extension:**
-   * Pantau log setiap container secara langsung atau gunakan menu *Exec* untuk masuk ke dalam shell container.
+## Pengujian dengan VS Code Extension
+1. **Thunder Client / Postman:** Kirim request ke `http://localhost:8081` sesuai rincian payload di atas.
+2. **Docker Extension:** Pantau container lifecycle, logs, atau gunakan fitur Exec untuk inspeksi container.
