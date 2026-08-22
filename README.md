@@ -1,3 +1,5 @@
+<div align="center">
+
 # Microservice Academic System
 
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
@@ -8,9 +10,9 @@
 ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
 
-Implementasi arsitektur microservices menggunakan Docker dan Docker Compose untuk sistem informasi akademik sederhana, mencakup autentikasi akun dan kalkulasi IPS (Indeks Prestasi Semester) mahasiswa.
+<p>Implementasi arsitektur microservices menggunakan Docker dan Docker Compose untuk sistem informasi akademik sederhana, mencakup autentikasi akun dan kalkulasi IPS (Indeks Prestasi Semester) mahasiswa.</p>
 
----
+</div>
 
 ## Arsitektur Sistem
 
@@ -44,8 +46,6 @@ Implementasi arsitektur microservices menggunakan Docker dan Docker Compose untu
 
 Seluruh container terhubung dalam satu jaringan internal bridge (`academic-net`) dengan isolasi subnet `172.16.0.0/28`.
 
----
-
 ## Pemenuhan Spesifikasi Soal UAS
 
 ### 1. Task Wajib
@@ -76,8 +76,6 @@ Seluruh container terhubung dalam satu jaringan internal bridge (`academic-net`)
 - **Resource Limits Auth Service:** CPU dibatasi 0.5 virtual core dan RAM 512 MB.
 - **Auto-restart DB Auth:** Kebijakan `restart: unless-stopped`.
 
----
-
 ## Panduan Menjalankan Layanan
 
 ### Prasyarat
@@ -100,8 +98,6 @@ Semua container (`api-gateway`, `auth-service`, `auth-db`, `score-service`) haru
 docker-compose down
 ```
 
----
-
 ## Dokumentasi API Endpoint
 
 Seluruh request dikirim melalui API Gateway pada host port `8081`.
@@ -121,8 +117,6 @@ Seluruh request dikirim melalui API Gateway pada host port `8081`.
   }
 }
 ```
-
----
 
 ### 2. Sub-layanan Autentikasi (`auth-service`)
 
@@ -201,8 +195,6 @@ Seluruh request dikirim melalui API Gateway pada host port `8081`.
 }
 ```
 
----
-
 ### 3. Sub-layanan Penilaian (`score-service`)
 
 #### A. Informasi Skala Bobot Nilai
@@ -277,8 +269,6 @@ Seluruh request dikirim melalui API Gateway pada host port `8081`.
   }
 }
 ```
-
----
 
 ## Pengujian dengan VS Code Extension
 1. **Thunder Client / Postman:** Kirim request ke `http://localhost:8081` sesuai rincian payload di atas.
