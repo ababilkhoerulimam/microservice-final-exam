@@ -1,48 +1,77 @@
 services:
+  # -------------------------------------------------------------------
+  # 1. API Gateway (Reverse Proxy)
+  # Pintu masuk tunggal bagi client (Postman/Browser). Gateway ini
+  # bertugas me-routing request ke auth-service (/api/auth) atau
+  # score-service (/api/score).
+  # -------------------------------------------------------------------
   api-gateway:
     image: nginx:alpine
     container_name: api-gateway
     ports:
+      # Port mapping: [Port Host/Laptop] : [Port Container Nginx]
+      # Request ke http://localhost:8081 akan diteruskan ke port 80 di container
       - "8081:80"
     volumes:
+      # Mount konfigurasi nginx.conf lokal ke container dengan mode Read-Only (:ro)
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
+      # Memastikan gateway baru start setelah service backend berjalan
       - auth-service
       - score-service
     networks:
       - academic-net
     restart: unless-stopped
 
+  # -------------------------------------------------------------------
+  # 2. Auth Service (Otentikasi & Akun Mahasiswa)
+  # REST API berbasis Node.js Express untuk registrasi, login, dan JWT.
+  # -------------------------------------------------------------------
   auth-service:
     build:
       context: ./auth-service
       dockerfile: Dockerfile
     container_name: auth-service
     environment:
+      # Variabel lingkungan yang dibaca oleh process.env di server.js
       - NODE_ENV=development
       - PORT=3001
       - MONGO_URI=mongodb://auth-db:27017/auth
       - JWT_SECRET=unesa_caos_super_secure_jwt_secret_key_2025_987654321
     depends_on:
+      # auth-service membutuhkan database MongoDB aktif terlebih dahulu
       - auth-db
     deploy:
       resources:
         limits:
+          # Resource Limit: Mencegah container memakan resource berlebih
+          # Maksimal 0.5 CPU core (50%) dan 512 Megabytes RAM
           cpus: '0.50'
           memory: 512M
     networks:
       - academic-net
     restart: unless-stopped
 
+  # -------------------------------------------------------------------
+  # 3. Auth Database (MongoDB)
+  # Database NoSQL untuk persistensi data pengguna dan kredensial.
+  # -------------------------------------------------------------------
   auth-db:
     image: mongo:6.0
     container_name: auth-db
+    # Auto-restart otomatis jika container berhenti / crash
     restart: unless-stopped
     volumes:
+      # Bind Mount: Menyimpan data database di folder lokal ./auth-data
+      # agar data tidak hilang (persistent) ketika container di-restart/stop
       - ./auth-data:/data/db
     networks:
       - academic-net
 
+  # -------------------------------------------------------------------
+  # 4. Score Service (Penghitungan IPS Mahasiswa)
+  # REST API independen untuk kalkulasi Indeks Prestasi Semester.
+  # -------------------------------------------------------------------
   score-service:
     build:
       context: ./score-service
@@ -55,10 +84,16 @@ services:
       - academic-net
     restart: unless-stopped
 
+# ---------------------------------------------------------------------
+# Internal Network (Jaringan Terisolasi Khusus Microservice)
+# ---------------------------------------------------------------------
 networks:
   academic-net:
+    # Driver bridge membuat jaringan virtual privat di Docker host
+    # Container dapat saling memanggil menggunakan nama servicenya (DNS Docker)
     driver: bridge
     ipam:
       driver: default
       config:
+        # Menentukan rentang IP address subnet khusus (172.16.0.0/28)
         - subnet: 172.16.0.0/28
