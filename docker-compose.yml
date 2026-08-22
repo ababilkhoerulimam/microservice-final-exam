@@ -1,10 +1,8 @@
 services:
-  # -------------------------------------------------------------------
   # 1. API Gateway (Reverse Proxy)
   # Pintu masuk tunggal bagi client (Postman/Browser). Gateway ini
   # bertugas me-routing request ke auth-service (/api/auth) atau
   # score-service (/api/score).
-  # -------------------------------------------------------------------
   api-gateway:
     image: nginx:alpine
     container_name: api-gateway
@@ -23,10 +21,8 @@ services:
       - academic-net
     restart: unless-stopped
 
-  # -------------------------------------------------------------------
   # 2. Auth Service (Otentikasi & Akun Mahasiswa)
   # REST API berbasis Node.js Express untuk registrasi, login, dan JWT.
-  # -------------------------------------------------------------------
   auth-service:
     build:
       context: ./auth-service
@@ -52,10 +48,8 @@ services:
       - academic-net
     restart: unless-stopped
 
-  # -------------------------------------------------------------------
   # 3. Auth Database (MongoDB)
   # Database NoSQL untuk persistensi data pengguna dan kredensial.
-  # -------------------------------------------------------------------
   auth-db:
     image: mongo:6.0
     container_name: auth-db
@@ -68,10 +62,8 @@ services:
     networks:
       - academic-net
 
-  # -------------------------------------------------------------------
   # 4. Score Service (Penghitungan IPS Mahasiswa)
   # REST API independen untuk kalkulasi Indeks Prestasi Semester.
-  # -------------------------------------------------------------------
   score-service:
     build:
       context: ./score-service
@@ -84,9 +76,7 @@ services:
       - academic-net
     restart: unless-stopped
 
-# ---------------------------------------------------------------------
 # Internal Network (Jaringan Terisolasi Khusus Microservice)
-# ---------------------------------------------------------------------
 networks:
   academic-net:
     # Driver bridge membuat jaringan virtual privat di Docker host
