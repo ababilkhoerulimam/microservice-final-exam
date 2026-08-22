@@ -1,0 +1,64 @@
+services:
+  api-gateway:
+    image: nginx:alpine
+    container_name: api-gateway
+    ports:
+      - "8081:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - auth-service
+      - score-service
+    networks:
+      - academic-net
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MONGO_URI=mongodb://auth-db:27017/auth
+      - JWT_SECRET=unesa_caos_super_secure_jwt_secret_key_2025_987654321
+    depends_on:
+      - auth-db
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+    networks:
+      - academic-net
+    restart: unless-stopped
+
+  auth-db:
+    image: mongo:6.0
+    container_name: auth-db
+    restart: unless-stopped
+    volumes:
+      - ./auth-data:/data/db
+    networks:
+      - academic-net
+
+  score-service:
+    build:
+      context: ./score-service
+      dockerfile: Dockerfile
+    container_name: score-service
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+    networks:
+      - academic-net
+    restart: unless-stopped
+
+networks:
+  academic-net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.0.0/28
