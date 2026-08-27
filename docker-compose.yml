@@ -12,7 +12,7 @@ services:
       - "8081:80"
     volumes:
       # Mount konfigurasi nginx.conf lokal ke container dengan mode Read-Only (:ro)
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./api-gateway/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       # Memastikan gateway baru start setelah service backend berjalan
       - auth-service

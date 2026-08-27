@@ -1,52 +1,44 @@
 <div align="center">
+  <h1>Academic Microservices System</h1>
+  <p><strong>Containerized Multi-Service Academic Management and Evaluation Platform</strong></p>
 
-# Academic Microservices System
+  <p align="center">
+    <img src="https://img.shields.io/badge/Architecture-Microservices-blue?style=flat-square" alt="Architecture">
+    <img src="https://img.shields.io/badge/Language-Node.js_18-339933?style=flat-square&logo=node.js&logoColor=white" alt="Language">
+    <img src="https://img.shields.io/badge/Database-MongoDB_6.0-47A248?style=flat-square&logo=mongodb&logoColor=white" alt="Database">
+    <img src="https://img.shields.io/badge/Status-Active-success?style=flat-square" alt="Status">
+  </p>
 
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Docker Compose](https://img.shields.io/badge/Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
-
-<p>A containerized academic microservices architecture built with Docker Compose, Nginx API Gateway, Node.js, Express, MongoDB, and JWT authentication.</p>
-
+  <p align="center">
+    A containerized academic microservices architecture built with Docker Compose, Nginx API Gateway, Node.js, Express, MongoDB, and JWT authentication.
+  </p>
 </div>
+
+## Tech Stack
+
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
+![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
 
 ## System Architecture
 
-```
-                      +-----------------------------+
-                      |   Client / Thunder Client   |
-                      +-----------------------------+
-                                     |
-                                     | HTTP :8081
-                                     v
-                 +---------------------------------------+
-                 |       api-gateway (Nginx Alpine)      |
-                 |      Internal Port: 80 -> Host: 8081  |
-                 +---------------------------------------+
-                     |                               |
-          /api/auth/ |                   /api/score/ |
-                     v                               v
-       +----------------------------+   +----------------------------+
-       |   auth-service (Node.js)   |   |  score-service (Node.js)   |
-       |         Port: 3001         |   |         Port: 3002         |
-       |  Limit: 0.5 CPU, 512MB RAM |   +----------------------------+
-       +----------------------------+
-                     |
-                     | mongodb://auth-db:27017/auth
-                     v
-       +----------------------------+
-       |     auth-db (Mongo 6.0)    |
-       | Volume: ./auth-data:/data/db|
-       +----------------------------+
-```
+The application is structured into four containerized services orchestrated via Docker Compose:
 
-All containers communicate securely over an isolated internal bridge network (`academic-net`) with a custom subnet (`172.16.0.0/28`).
+1. **Client Layer:** External requests from browsers, Postman, or Thunder Client connect to the host port `8081`.
+2. **API Gateway (`api-gateway`):** An Nginx Alpine reverse proxy running on container port `80` that routes traffic based on path prefixes:
+   - Routes `/api/auth/` requests to `http://auth-service:3001/`
+   - Routes `/api/score/` requests to `http://score-service:3002/`
+   - Serves general gateway health information on the root path `/`
+3. **Authentication Service (`auth-service`):** A Node.js and Express REST API operating on port `3001`. It handles student registration, credential hashing with bcrypt, user authentication, and JSON Web Token (JWT) generation. It is subject to resource limits of 0.5 CPU core and 512 MB RAM.
+4. **Database (`auth-db`):** A MongoDB 6.0 instance operating on default port `27017` with data persistence mapped to the host directory `./auth-data`.
+5. **Score Service (`score-service`):** An independent Node.js and Express REST API on port `3002` that calculates student Semester GPA (Indeks Prestasi Semester / IPS), determining course grade points, total credit weight, academic honors (predikat), and maximum credit allowance for subsequent semesters.
+6. **Network Isolation (`academic-net`):** All containers communicate internally across a dedicated Docker bridge network with a custom IPAM subnet configuration (`172.16.0.0/28`).
 
-## Specifications & Requirements
+## Specifications and Requirements
 
 ### 1. Mandatory Requirements
 - **Internal Networking:** Bridge network driver named `academic-net`.
@@ -54,7 +46,7 @@ All containers communicate securely over an isolated internal bridge network (`a
 - **API Gateway Service:**
   - Image: `nginx:alpine`
   - Container name: `api-gateway`
-  - Read-only volume mount: `./nginx.conf` -> `/etc/nginx/nginx.conf:ro`
+  - Read-only volume mount: `./api-gateway/nginx.conf` to `/etc/nginx/nginx.conf:ro`
   - Dependency: `depends_on: [auth-service, score-service]`
   - Connected to `academic-net`.
 - **Authentication Service:**
@@ -70,7 +62,7 @@ All containers communicate securely over an isolated internal bridge network (`a
 - **Score Service:**
   - REST API on `score-service` calculating student Semester GPA (IPS) based on course credits and letter grades.
 
-### 2. Optional / Bonus Requirements
+### 2. Optional and Bonus Requirements
 - **Custom Subnet:** Isolated IPAM subnet `172.16.0.0/28`.
 - **API Gateway Exposed Port:** Host port routed to `8081` (`"8081:80"`).
 - **Resource Limits:** `auth-service` constrained to 0.5 virtual CPU cores and 512 MB RAM.
@@ -91,7 +83,7 @@ docker-compose up --build -d
 ```bash
 docker-compose ps
 ```
-All services (`api-gateway`, `auth-service`, `auth-db`, `score-service`) should be in the running / Up state.
+All services (`api-gateway`, `auth-service`, `auth-db`, `score-service`) should show running status.
 
 ### 3. Stop Services
 ```bash
